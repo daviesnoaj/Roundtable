@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roundtable – the investing network for everyday investors</title>
+<meta name="description" content="Roundtable is a free community where investors share ideas, follow what others are watching, and chat live.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif&display=swap">
+<style>
+:root{--bg:#0a1224;--panel:#101b33;--panel2:#15233f;--line:#223253;--text:#e6ecf8;--muted:#8b9ab8;--up:#2ecc8f;--down:#ff5c6c;--watch:#f5b94c;--accent:#5b8cff;color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:400 15px/1.5 "Instrument Sans",system-ui,sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:20px 16px 40px}
+h1{font:400 34px/1.05 "Instrument Serif",Georgia,serif;margin:0 0 4px}
+h2{font:400 21px/1.2 "Instrument Serif",Georgia,serif;margin:0 0 10px}
+.sub,.note,.empty{color:var(--muted)}.sub{margin:0 0 18px}.note{font-size:13px}
+.cols{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:820px){.cols{grid-template-columns:1.6fr 1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+input,textarea,select{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:10px;font:inherit}
+textarea{min-height:84px;resize:vertical}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.fld{margin-bottom:10px}
+button{background:var(--accent);color:#06101f;border:0;border-radius:8px;padding:10px 14px;font:600 14px "Instrument Sans",sans-serif;cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}
+button.alt{background:transparent;color:var(--text);border:1px solid var(--line)}
+button.chip{background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-weight:500}
+button.chip[aria-pressed=true]{color:var(--text);border-color:var(--accent);background:var(--panel2)}
+button.link{background:none;color:var(--muted);padding:0;font-weight:500;font-size:13px}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.post{border-top:1px solid var(--line);padding:14px 0}.post:first-child{border-top:0}
+.meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.meta b{color:var(--text);font-weight:600}
+.badge{border-radius:6px;padding:1px 8px;font-size:12px;font-weight:600}
+.Bullish{background:rgba(46,204,143,.18);color:var(--up)}
+.Bearish{background:rgba(255,92,108,.18);color:var(--down)}
+.Watching{background:rgba(245,185,76,.18);color:var(--watch)}
+.tk{font-weight:600;color:var(--text)}
+.post p,.msg p{margin:4px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.member{border-top:1px solid var(--line);padding:10px 0}.member:first-child{border-top:0}
+.member b{font-weight:600}.member small{display:block;color:var(--muted)}
+.chat{display:flex;flex-direction:column;height:min(70vh,620px)}
+#log{flex:1;overflow-y:auto;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px}
+.msg{margin:0 0 12px}.msg .who{font-weight:600;font-size:13px}.msg .when{color:var(--muted);font-size:12px;margin-left:8px}
+.msg.me .who{color:var(--accent)}
+.send{display:flex;gap:8px}
+#amsg,#msg{margin:8px 0 0;font-size:14px;color:var(--watch)}
+footer{color:var(--muted);font-size:12.5px;margin-top:20px;border-top:1px solid var(--line);padding-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Roundtable</h1>
+<p class="sub">Share investing ideas, see what other people are watching, and chat live.</p>
+
+<section class="panel" id="auth">
+  <h2>Join or sign in</h2>
+  <div class="row">
+    <div><label for="an">Display name (new accounts)</label><input id="an" maxlength="40" autocomplete="nickname"></div>
+    <div><label for="ae">Email</label><input id="ae" type="email" autocomplete="email"></div>
+  </div>
+  <div class="fld"><label for="ap">Password (at least 6 characters)</label><input id="ap" type="password" autocomplete="current-password"></div>
+  <button id="up" type="button">Create account</button> <button id="in" type="button" class="alt">Sign in</button>
+  <p id="amsg"></p>
+</section>
+<section class="panel bar" id="who" hidden><span id="whotxt"></span><button id="out" type="button" class="alt">Sign out</button></section>
+
+<section class="panel">
+  <h2>Chat room</h2>
+  <div class="chat">
+    <div id="log" role="log" aria-live="polite"><p class="empty">Loading chat…</p></div>
+    <div class="send"><input id="cm" maxlength="300" placeholder="Sign in to join the chat" aria-label="Chat message" disabled><button id="cs" type="button" disabled>Send</button></div>
+  </div>
+</section>
+
+<div class="cols">
+  <main>
+    <section class="panel">
+      <h2>Share an idea</h2>
+      <div class="row">
+        <div><label for="pt">Ticker</label><input id="pt" maxlength="8" placeholder="AAPL" autocomplete="off"></div>
+        <div><label for="ps">Your view</label><select id="ps"><option>Bullish</option><option>Bearish</option><option>Watching</option></select></div>
+      </div>
+      <label for="px">What’s your thinking?</label>
+      <textarea id="px" maxlength="400" placeholder="Say why. Others want the reasoning, not only the call."></textarea>
+      <p style="margin:10px 0 0"><button id="go" type="button" disabled>Post idea</button></p>
+      <p id="msg"></p>
+    </section>
+    <section class="panel">
+      <h2>Ideas</h2>
+      <div class="chips" id="chips"></div>
+      <div id="feed"><p class="empty">Loading ideas…</p></div>
+    </section>
+  </main>
+  <aside>
+    <section class="panel">
+      <h2>Your profile</h2>
+      <div class="fld"><label for="fo">What you invest in</label><input id="fo" maxlength="60" placeholder="Long-term dividend stocks"></div>
+      <div class="fld"><label for="bi">About you</label><textarea id="bi" maxlength="200" style="min-height:64px" placeholder="Experience level, goals, what you’re learning"></textarea></div>
+      <button id="sv" type="button" disabled>Save profile</button>
+    </section>
+    <section class="panel"><h2>Members</h2><div id="mem"><p class="empty">No members yet.</p></div></section>
+  </aside>
+</div>
+<footer>Posts are opinions from members, not financial advice. Capital is at risk. Do your own research before you invest.</footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+(function(){
+var sb=supabase.createClient("https://pfhcwxejrjewkyjatdst.supabase.co","sb_publishable_zwPyOImWgjc19fPvCt-18Q_E0pS1hIv");
+var $=function(i){return document.getElementById(i)};
+var me=null,profiles={},posts=[],chat=[],filter="All",first=true;
+function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+function nm(id){return profiles[id]&&profiles[id].name?profiles[id].name:"Member"}
+function ago(s){var d=Math.max(1,(Date.now()-new Date(s).getTime())/1000);if(d<60)return"just now";if(d<3600)return Math.floor(d/60)+" min ago";if(d<86400)return Math.floor(d/3600)+" h ago";return Math.floor(d/86400)+" d ago"}
+function say(id,t){$(id).textContent=t||""}
+
+function chips(){var c=$("chips");c.textContent="";["All","Bullish","Bearish","Watching"].forEach(function(f){var b=el("button","chip",f);b.type="button";b.setAttribute("aria-pressed",String(f===filter));b.onclick=function(){filter=f;chips();drawFeed()};c.appendChild(b)})}
+function drawFeed(){
+  var f=$("feed");f.textContent="";
+  var l=posts.filter(function(p){return filter==="All"||p.stance===filter});
+  if(!l.length){f.appendChild(el("p","empty",posts.length?"No "+filter.toLowerCase()+" ideas yet.":"No ideas yet. Be the first to share one."));return}
+  l.forEach(function(p){
+    var d=el("div","post"),m=el("div","meta");
+    m.appendChild(el("b",null,nm(p.uid)));
+    if(p.ticker)m.appendChild(el("span","tk","$"+p.ticker));
+    m.appendChild(el("span","badge "+p.stance,p.stance));
+    m.appendChild(el("span",null,ago(p.created_at)));
+    if(me&&p.uid===me.id){var x=el("button","link","Delete");x.type="button";x.onclick=async function(){await sb.from("posts").delete().eq("id",p.id);loadPosts()};m.appendChild(x)}
+    d.appendChild(m);d.appendChild(el("p",null,p.body));f.appendChild(d)});
+}
+function drawMem(){
+  var m=$("mem");m.textContent="";var ids=Object.keys(profiles);
+  if(!ids.length){m.appendChild(el("p","empty","No members yet."));return}
+  ids.forEach(function(id){var x=profiles[id],d=el("div","member");d.appendChild(el("b",null,x.name+(me&&id===me.id?" (you)":"")));if(x.focus)d.appendChild(el("small",null,x.focus));if(x.bio)d.appendChild(el("small",null,x.bio));m.appendChild(d)});
+}
+function drawChat(){
+  var l=$("log"),near=l.scrollHeight-l.scrollTop-l.clientHeight<80;l.textContent="";
+  if(!chat.length){l.appendChild(el("p","empty","No messages yet. Say hello."));return}
+  chat.forEach(function(c){var mine=me&&c.uid===me.id,d=el("div","msg"+(mine?" me":"")),w=el("div");w.appendChild(el("span","who",mine?"You":nm(c.uid)));w.appendChild(el("span","when",ago(c.created_at)));d.appendChild(w);d.appendChild(el("p",null,c.body));l.appendChild(d)});
+  if(near||first){l.scrollTop=l.scrollHeight;first=false}
+}
+async function loadProfiles(){var r=await sb.from("profiles").select("*");if(r.data){profiles={};r.data.forEach(function(p){profiles[p.id]=p});drawMem();drawFeed();drawChat()}}
+async function loadPosts(){var r=await sb.from("posts").select("*").order("created_at",{ascending:false}).limit(100);if(r.data){posts=r.data;drawFeed()}}
+async function loadChat(){var r=await sb.from("chat").select("*").order("created_at",{ascending:false}).limit(150);if(r.data){chat=r.data.reverse();drawChat()}}
+
+async function setUser(u){
+  me=u;
+  $("auth").hidden=!!u;$("who").hidden=!u;
+  ["go","sv","cs","cm"].forEach(function(i){$(i).disabled=!u});
+  $("cm").placeholder=u?"Message the room":"Sign in to join the chat";
+  if(u){
+    var r=await sb.from("profiles").select("*").eq("id",u.id).maybeSingle();
+    if(!r.data){await sb.from("profiles").insert({id:u.id,name:((u.user_metadata&&u.user_metadata.name)||u.email.split("@")[0]).slice(0,40)})}
+    await loadProfiles();
+    var p=profiles[u.id]||{};$("whotxt").textContent="Signed in as "+(p.name||u.email);
+    if(!$("fo").value&&!$("bi").value){$("fo").value=p.focus||"";$("bi").value=p.bio||""}
+  }
+  drawFeed();drawChat();drawMem();
+}
+$("up").onclick=async function(){
+  var n=$("an").value.trim(),e=$("ae").value.trim(),p=$("ap").value;
+  if(!n||!e||p.length<6){say("amsg","Enter a display name, an email and a password of at least 6 characters.");return}
+  say("amsg","Creating your account…");
+  var r=await sb.auth.signUp({email:e,password:p,options:{data:{name:n}}});
+  if(r.error){say("amsg",r.error.message)}else if(!r.data.session){say("amsg","Check your email for a confirmation link, then sign in.")}else{say("amsg","")}
+};
+$("in").onclick=async function(){
+  say("amsg","Signing in…");
+  var r=await sb.auth.signInWithPassword({email:$("ae").value.trim(),password:$("ap").value});
+  say("amsg",r.error?r.error.message:"");
+};
+$("out").onclick=function(){sb.auth.signOut()};
+$("go").onclick=async function(){
+  var t=$("pt").value.toUpperCase().replace(/[^A-Z0-9.\-]/g,""),x=$("px").value.trim();
+  if(!x){say("msg","Write a few words about your idea first.");return}
+  $("go").disabled=true;say("msg","");
+  var r=await sb.from("posts").insert({ticker:t,stance:$("ps").value,body:x});
+  if(r.error){say("msg","Couldn’t post: "+r.error.message)}else{$("px").value="";$("pt").value="";loadPosts()}
+  $("go").disabled=false;
+};
+async function sendChat(){
+  var x=$("cm").value.trim();if(!x||!me)return;$("cs").disabled=true;
+  var r=await sb.from("chat").insert({body:x});
+  if(r.error){$("cm").placeholder="Couldn’t send. Try again."}else{$("cm").value="";first=true;loadChat()}
+  $("cs").disabled=false;$("cm").focus();
+}
+$("cs").onclick=sendChat;
+$("cm").addEventListener("keydown",function(e){if(e.key==="Enter")sendChat()});
+$("sv").onclick=async function(){
+  $("sv").disabled=true;
+  var r=await sb.from("profiles").update({focus:$("fo").value.trim(),bio:$("bi").value.trim()}).eq("id",me.id);
+  $("sv").textContent=r.error?"Couldn’t save":"Saved";loadProfiles();
+  setTimeout(function(){$("sv").textContent="Save profile";$("sv").disabled=false},1500);
+};
+
+chips();
+sb.channel("roundtable").on("postgres_changes",{event:"*",schema:"public",table:"chat"},loadChat).on("postgres_changes",{event:"*",schema:"public",table:"posts"},loadPosts).on("postgres_changes",{event:"*",schema:"public",table:"profiles"},loadProfiles).subscribe();
+sb.auth.onAuthStateChange(function(_e,s){setUser(s&&s.user?s.user:null)});
+Promise.all([loadProfiles(),loadPosts(),loadChat()]);
+})();
+</script>
+</body>
+</html>
