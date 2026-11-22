@@ -1,1 +1,32 @@
-4764977237068d316ec39c1e01cfe6bd932a4e33
+create table if not exists rt_members (
+  uid uuid primary key references auth.users(id) on delete cascade,
+  name text not null, invests text, about text,
+  created_at timestamptz default now());
+create table if not exists rt_posts (
+  id bigint generated always as identity primary key,
+  uid uuid not null default auth.uid() references auth.users(id),
+  name text not null, ticker text not null, stance text not null, body text not null,
+  created_at timestamptz default now());
+create table if not exists rt_chat (
+  id bigint generated always as identity primary key,
+  uid uuid not null default auth.uid() references auth.users(id),
+  name text not null, body text not null,
+  created_at timestamptz default now());
+
+alter table rt_members enable row level security;
+alter table rt_posts enable row level security;
+alter table rt_chat enable row level security;
+
+create policy "read members" on rt_members for select to anon, authenticated using (true);
+create policy "read posts" on rt_posts for select to anon, authenticated using (true);
+create policy "read chat" on rt_chat for select to anon, authenticated using (true);
+create policy "add member" on rt_members for insert to authenticated with check (auth.uid() = uid);
+create policy "edit member" on rt_members for update to authenticated using (auth.uid() = uid);
+create policy "add post" on rt_posts for insert to authenticated with check (auth.uid() = uid);
+create policy "add chat" on rt_chat for insert to authenticated with check (auth.uid() = uid);
+
+grant select on rt_members, rt_posts, rt_chat to anon, authenticated;
+grant insert, update on rt_members to authenticated;
+grant insert on rt_posts, rt_chat to authenticated;
+
+alter publication supabase_realtime add table rt_chat, rt_posts;
